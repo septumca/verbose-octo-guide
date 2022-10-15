@@ -18,7 +18,9 @@ function Login() {
   }
 
   const handleLogin = async () => {
+    console.info('handleLogin');
     const data = await auth(loginData.login, sha256(loginData.password).toString());
+    console.info(data);
     if(data) {
       saveToken(data.token);
       navigate(state?.from ?? '/events');

@@ -1,4 +1,5 @@
 import jwt_decode from "jwt-decode";
+import { json } from "react-router-dom";
 
 const TOKEN_KEY: string = 'ZMTWC_TOKEN';
 
@@ -6,8 +7,12 @@ export const saveToken = (token: string) => {
   localStorage.setItem(TOKEN_KEY, token);
 }
 
-export const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY);
+export const getToken = (): string => {
+  let token = localStorage.getItem(TOKEN_KEY);
+  if (!token) {
+    throw json({}, { status: 401 });
+  }
+  return token;
 }
 
 export const removeToken = () => {
@@ -17,10 +22,16 @@ export const removeToken = () => {
 export const isLoggedIn = (): boolean => localStorage.getItem(TOKEN_KEY) !== null;
 
 export const getUserId = (): number | null => {
-  const token = getToken();
-  if (token) {
-    let { sub } = jwt_decode(token) as any;
+  try {
+    let { sub } = jwt_decode(getToken()) as any;
     return parseInt(sub, 10);
+  } catch(e) {
+    console.error('Error getting userId', e);
+    return null;
   }
-  return null;
+}
+
+export const getUserIdRethrow = (): number | null => {
+  let { sub } = jwt_decode(getToken()) as any;
+  return parseInt(sub, 10);
 }

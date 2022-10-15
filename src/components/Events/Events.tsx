@@ -1,7 +1,11 @@
+import { useState } from "react";
 import {
+  Link,
+  useFetcher,
   useLoaderData,
   useNavigate,
 } from "react-router-dom";
+import { isLoggedIn } from "../../utils/auth";
 import { EventSummary, fetchEventList, User } from '../../utils/service';
 import "./Events.css";
 
@@ -46,6 +50,9 @@ function Events() {
           creator={creator}
         />
       )}
+      <div>
+        <Link to="/events/new">New Event</Link>
+      </div>
     </div>
   )
 }
