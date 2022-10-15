@@ -1,12 +1,13 @@
-import { auth } from '../utils/service';
-import { saveToken } from "../utils/auth";
+import { auth } from '../../utils/service';
+import { saveToken } from "../../utils/auth";
 import { useState } from "react";
 
 import sha256 from 'crypto-js/sha256';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function Login() {
   const navigate = useNavigate();
+  const { state } = useLocation();
   const [loginData, setLoginData] = useState<{[x: string]: string }>({ login: '', password: '' });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,7 +21,7 @@ function Login() {
     const data = await auth(loginData.login, sha256(loginData.password).toString());
     if(data) {
       saveToken(data.token);
-      navigate('/');
+      navigate(state.from ?? '/events');
     }
   }
 
@@ -39,4 +40,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Login;
