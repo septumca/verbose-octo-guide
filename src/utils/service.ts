@@ -52,7 +52,7 @@ export type EventDetailData = {
   name: string,
   description?: string,
   participants: User[],
-  requirements: { id: number, name: string, description?: string }[],
+  requirements: { id: number, name: string, description?: string, size: number }[],
   fullfillments: { requirement: number, user: User }[],
   creator: User,
 }

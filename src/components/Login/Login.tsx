@@ -21,7 +21,7 @@ function Login() {
     const data = await auth(loginData.login, sha256(loginData.password).toString());
     if(data) {
       saveToken(data.token);
-      navigate(state.from ?? '/events');
+      navigate(state?.from ?? '/events');
     }
   }
 
