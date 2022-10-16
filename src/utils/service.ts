@@ -1,6 +1,6 @@
 import { getToken } from "./auth";
 
-async function makeFetch<T>(method: string, uri_path: string, body: any): Promise<T> {
+async function makeFetch<T>(method: string, uri_path: string, body: any = null): Promise<Response> {
   let headers: any = {
     'Content-Type': 'application/json'
   };
@@ -18,8 +18,9 @@ async function makeFetch<T>(method: string, uri_path: string, body: any): Promis
       body: body ? JSON.stringify(body) : null,
     }
   );
-  if (response.status === 200) {
-    return await response.json();
+
+  if (response.status === 200 || response.status === 201 || response.status === 204) {
+    return response;
   } else {
     throw response;
   }
@@ -31,7 +32,7 @@ export type AuthResponse = {
 };
 
 export const auth = async (login: string, sha256password: string): Promise<AuthResponse> => {
-  return makeFetch('POST', 'authentificate', { username: login, password: sha256password });
+  return (await makeFetch('POST', 'authentificate', { username: login, password: sha256password })).json();
 }
 
 export type User = {
@@ -40,11 +41,11 @@ export type User = {
 }
 
 export const fetchUser = async (id: number): Promise<User> => {
-  return await makeFetch<User>('GET', `user/${id}`, null);
+  return (await makeFetch('GET', `user/${id}`)).json();
 }
 
 export const fetchUserList = async (): Promise<User[]> => {
-  return await makeFetch<User[]>('GET', `user`, null) ?? [];
+  return (await makeFetch('GET', `user`)).json() ?? [];
 }
 
 export type Requirement = {
@@ -65,7 +66,7 @@ export type EventDetailData = {
 }
 
 export const fetchEvent = async (id: number): Promise<EventDetailData> => {
-  return await makeFetch<EventDetailData>('GET', `event/${id}`, null);
+  return (await makeFetch('GET', `event/${id}`)).json();
 }
 
 export type EventSummary = {
@@ -76,7 +77,7 @@ export type EventSummary = {
 }
 
 export const fetchEventList = async (): Promise<EventSummary[]> => {
-  return await makeFetch<EventSummary[]>('GET', 'event', null) ?? [];
+  return (await makeFetch('GET', 'event')).json() ?? [];
 }
 
 export type CreateEvent = {
@@ -85,7 +86,7 @@ export type CreateEvent = {
 }
 
 export const createEvent = async (data: CreateEvent): Promise<EventSummary> => {
-  return await makeFetch<EventSummary>('POST', 'event', data);
+  return (await makeFetch('POST', 'event', data)).json();
 }
 
 export type CreateRequirement = {
@@ -98,5 +99,23 @@ export type CreateRequirement = {
 export type RequirementResponse = Requirement & { id: number };
 
 export const createRequirement = async (data: CreateRequirement): Promise<RequirementResponse> => {
-  return await makeFetch<RequirementResponse>('POST', 'requirement', data);
+  return (await makeFetch('POST', 'requirement', data)).json();
+}
+
+export const deleteRequirement = async (id: number): Promise<void> => {
+  await makeFetch('DELETE', `requirement/${id}`);
+}
+
+export type CreateParticipant = {
+  user: number,
+  event: number,
+}
+
+export const createParticipant = async (data: CreateParticipant): Promise<void> => {
+  await makeFetch('POST', 'participant', data);
+}
+
+export const deleteParticipant = async (user: number, event: number): Promise<void> => {
+  console.info('deleteParticipant', user, event);
+  await makeFetch('DELETE', `participant/${user}/${event}`);
 }
