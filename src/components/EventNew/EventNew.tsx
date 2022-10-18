@@ -5,14 +5,14 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { getUserIdRethrow, isLoggedIn } from "../../utils/auth";
+import { getUserData, isLoggedIn } from "../../utils/auth";
 import { CreateEvent, createEvent } from '../../utils/service';
 import { getFormData } from "../../utils/utils";
 
 
 export async function action({ request, _params }: any) {
   let data = await getFormData(request, { removeEmptyString: true });
-  data.creator = getUserIdRethrow();
+  data.creator = getUserData().id;
   await createEvent(data as CreateEvent);
   return redirect(`/events`);
 }
@@ -32,7 +32,7 @@ function EventNew() {
 
   return (
     <Form method="post" id="contact-form">
-      <p>
+      <div>
         <span>Name</span>
         <input
           placeholder="Event Name"
@@ -40,7 +40,7 @@ function EventNew() {
           type="text"
           name="name"
         />
-      </p>
+      </div>
       <div>
         <div>Description</div>
         <textarea
@@ -48,10 +48,10 @@ function EventNew() {
           rows={6}
         />
       </div>
-      <p>
+      <div>
         <button type="submit">Save</button>
         <button type="button" onClick={handleCancel}>Cancel</button>
-      </p>
+      </div>
     </Form>
   )
 }

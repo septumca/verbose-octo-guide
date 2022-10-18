@@ -1,13 +1,10 @@
 import {
   Link,
+  useLoaderData,
   useNavigate,
 } from "react-router-dom";
-import {
-  useQuery,
-} from '@tanstack/react-query';
-import { fetchEventList, User } from '../../utils/service';
+import { EventSummary, fetchEventList, User } from '../../utils/service';
 import "./Events.css";
-import Loader from "../Loader";
 
 type EventCardProps = {
   id: number,
@@ -15,6 +12,10 @@ type EventCardProps = {
   description?: string,
   creator: User,
 };
+
+export async function loader() {
+  return fetchEventList();
+}
 
 function EventCard({ id, name, description, creator }: EventCardProps) {
   const navigate = useNavigate();
@@ -31,15 +32,11 @@ function EventCard({ id, name, description, creator }: EventCardProps) {
 }
 
 function Events() {
-  const { isLoading, data: events } = useQuery(['event-list'], fetchEventList);
-
-  if (isLoading) {
-    return <Loader />
-  }
+  const events = useLoaderData() as EventSummary[];
 
   return (
     <div className="container">
-      {events?.map(({ id, name, description, creator }) =>
+      {events.map(({ id, name, description, creator }) =>
         <EventCard
           key={id}
           id={id}

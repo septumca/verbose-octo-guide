@@ -12,8 +12,8 @@ import './App.css';
 
 import Root from './components/Root/Root';
 import Login from './components/Login/Login';
-import Events from './components/Events/Events';
-import EventDetail from './components/EventDetail/EventDetail';
+import Events, { loader as eventListLoader } from './components/Events/Events';
+import EventDetail, { loader as eventDetailLoader } from './components/EventDetail/EventDetail';
 import UserDetail, { loader as userLoader } from "./components/UserDetail/UserDetail";
 import ErrorPage from "./components/ErrorPage";
 import EventNew, { action as createEventAction } from "./components/EventNew/EventNew";
@@ -27,8 +27,8 @@ const router = createBrowserRouter(
       <Route path="/" element={<Root />} >
         <Route errorElement={<ErrorPage />} >
           <Route path="events/new" action={createEventAction} element={<EventNew />} />
-          <Route path="events/:id" element={<EventDetail />} />
-          <Route path="events" element={<Events />} />
+          <Route path="events/:id" element={<EventDetail />} loader={eventDetailLoader} />
+          <Route path="events" element={<Events />} loader={eventListLoader} />
           <Route path="users/:id" element={<UserDetail />} loader={userLoader} />
         </Route>
       </Route>

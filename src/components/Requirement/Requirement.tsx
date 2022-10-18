@@ -8,10 +8,11 @@ type RequirementProps = {
   name: string,
   description?: string,
   size: number,
-  fullfillments: { requirement: number, user: User }[]
+  fullfillments: { requirement: number, user: User }[],
+  showControls: boolean,
 }
 
-function Requirement({ name, description, size, fullfillments }: RequirementProps) {
+function Requirement({ name, description, size, fullfillments, showControls }: RequirementProps) {
   const loggedIn = isLoggedIn();
   const userId = getUserId();
   const hadFullfilled = userId && fullfillments.some(({ user: { id } }) => id === userId);
@@ -28,13 +29,13 @@ function Requirement({ name, description, size, fullfillments }: RequirementProp
     <div>
       <div>{name}</div>
       <div>{description}</div>
-      {loggedIn && !hadFullfilled && size < fullfillments.length && <div><button onClick={handleAddFullfillment}>Fullfull</button></div>}
+      {showControls && loggedIn && !hadFullfilled && size < fullfillments.length && <div><button onClick={handleAddFullfillment}>Fullfull</button></div>}
       <div>{fullfillments.length}/{size}</div>
       <div>Fullfilled by:
         {fullfillments.map(({ user: { id, username } }) =>
           <div key={id}>
             <Link to={`/users/${id}`}>{username}</Link>
-            {id === userId && <button onClick={handleRemoveFullfillment}>Leave</button>}
+            {showControls && id === userId && <button onClick={handleRemoveFullfillment}>Leave</button>}
           </div>
         )}
       </div>

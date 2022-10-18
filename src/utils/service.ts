@@ -89,6 +89,15 @@ export const createEvent = async (data: CreateEvent): Promise<EventSummary> => {
   return (await makeFetch('POST', 'event', data)).json();
 }
 
+export type UpdateEvent = {
+  name?: string,
+  description?: string
+}
+
+export const updateEvent = async (data: UpdateEvent): Promise<void> => {
+  await makeFetch('PUT', 'event', data);
+}
+
 export type CreateRequirement = {
   name: string,
   description?: string,
@@ -111,11 +120,15 @@ export type CreateParticipant = {
   event: number,
 }
 
-export const createParticipant = async (data: CreateParticipant): Promise<void> => {
-  await makeFetch('POST', 'participant', data);
+export type CreateParticipantResponse = {
+  user: number,
+  username: string,
+}
+
+export const createParticipant = async (data: CreateParticipant): Promise<CreateParticipantResponse> => {
+  return (await makeFetch('POST', 'participant', data)).json();
 }
 
 export const deleteParticipant = async (user: number, event: number): Promise<void> => {
-  console.info('deleteParticipant', user, event);
   await makeFetch('DELETE', `participant/${user}/${event}`);
 }

@@ -31,7 +31,10 @@ export const getUserId = (): number | null => {
   }
 }
 
-export const getUserIdRethrow = (): number | null => {
-  let { sub } = jwt_decode(getToken()) as any;
-  return parseInt(sub, 10);
+export const getUserData = (): { id: number, username: string } => {
+  let { sub, username } = jwt_decode(getToken()) as any;
+  return {
+    id: parseInt(sub, 10),
+    username
+  };
 }
