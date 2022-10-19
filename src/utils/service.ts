@@ -132,3 +132,21 @@ export const createParticipant = async (data: CreateParticipant): Promise<Create
 export const deleteParticipant = async (user: number, event: number): Promise<void> => {
   await makeFetch('DELETE', `participant/${user}/${event}`);
 }
+
+export type CreateFullfillment = {
+  user: number,
+  requirement: number,
+}
+
+export type CreateFullfillmentResponse = {
+  user: User,
+  requirement: number,
+}
+
+export const createFullfillment = async (data: CreateFullfillment): Promise<CreateFullfillmentResponse> => {
+  return (await makeFetch('POST', 'fullfillment', data)).json();
+}
+
+export const deleteFullfillment = async (user: number, requirement: number): Promise<void> => {
+  await makeFetch('DELETE', `fullfillment/${user}/${requirement}`);
+}

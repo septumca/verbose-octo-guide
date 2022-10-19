@@ -5,37 +5,56 @@ import { getUserId, isLoggedIn } from "../../utils/auth";
 import { User } from "../../utils/service";
 
 type RequirementProps = {
+  id: number,
   name: string,
   description?: string,
   size: number,
   fullfillments: { requirement: number, user: User }[],
-  showControls: boolean,
+  isOwner: boolean,
+  onDelete: (id: number) => {},
+  onAddFullfillment: (id: number) => {},
+  onRemoveFullfillment: (id: number) => {},
 }
 
-function Requirement({ name, description, size, fullfillments, showControls }: RequirementProps) {
+function Requirement({
+  id,
+  name,
+  description,
+  size,
+  fullfillments,
+  isOwner,
+  onDelete,
+  onAddFullfillment,
+  onRemoveFullfillment
+}: RequirementProps) {
   const loggedIn = isLoggedIn();
   const userId = getUserId();
   const hadFullfilled = userId && fullfillments.some(({ user: { id } }) => id === userId);
 
-  const handleAddFullfillment = async () => {
-
+  const handleAddFullfillment = () => {
+    onAddFullfillment(id);
   }
 
-  const handleRemoveFullfillment = async () => {
+  const handleRemoveFullfillment = () => {
+    onRemoveFullfillment(id);
+  }
 
+  const handleDelete = () => {
+    onDelete(id);
   }
 
   return (
     <div>
       <div>{name}</div>
       <div>{description}</div>
-      {showControls && loggedIn && !hadFullfilled && size < fullfillments.length && <div><button onClick={handleAddFullfillment}>Fullfull</button></div>}
+      {isOwner && <div><button onClick={handleDelete}>Delete</button></div>}
+      {loggedIn && !hadFullfilled && size > fullfillments.length && <div><button onClick={handleAddFullfillment}>Fullfull</button></div>}
       <div>{fullfillments.length}/{size}</div>
       <div>Fullfilled by:
         {fullfillments.map(({ user: { id, username } }) =>
           <div key={id}>
             <Link to={`/users/${id}`}>{username}</Link>
-            {showControls && id === userId && <button onClick={handleRemoveFullfillment}>Leave</button>}
+            {id === userId && <button onClick={handleRemoveFullfillment}>Leave</button>}
           </div>
         )}
       </div>
