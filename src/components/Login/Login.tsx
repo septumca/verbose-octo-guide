@@ -1,21 +1,14 @@
 import { auth } from '../../utils/service';
 import { saveToken } from "../../utils/auth";
-import { useState } from "react";
 
 import sha256 from 'crypto-js/sha256';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useInputData } from '../../utils/utils';
 
 function Login() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const [loginData, setLoginData] = useState<{[x: string]: string }>({ login: '', password: '' });
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginData(ld => ({
-      ...ld,
-      [event.target.name]: event.target.value
-    }));
-  }
+  const { data: loginData, handleInputChange } = useInputData({ login: '', password: '' });
 
   const handleLogin = async () => {
     const data = await auth(loginData.login, sha256(loginData.password).toString());

@@ -1,5 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { SyntheticEvent } from "react";
+import { SyntheticEvent, useState } from "react";
 
 export type GetFormDataOptions = {
   removeEmptyString?: boolean,
@@ -14,21 +13,32 @@ export const getSynthenticEventFormData = (event: SyntheticEvent): { [x: string]
 export function getFormData(formData: any, options?: GetFormDataOptions): any {
   const data = Object.fromEntries(formData);
   if (options?.removeEmptyString) {
-    Object.keys(data).forEach(k => {
-      if (data[k] === '') {
-        delete data[k];
-      }
-    });
+    removeEmptyStrings(data);
   }
   return data;
 }
 
-export const useInvalidateMutation = (fetch: any, queryToInvalidate: string): any => {
-  const queryClient = useQueryClient();
-  const mutation = useMutation(fetch, {
-    onSuccess: () => {
-      queryClient.invalidateQueries([queryToInvalidate])
-    },
+export function removeEmptyStrings(obj: any) {
+  Object.keys(obj).forEach(k => {
+    if (obj[k] === '') {
+      delete obj[k];
+    }
   });
-  return mutation;
 }
+
+export const useInputData = (initData: {[x: string]: any }) => {
+  const [data, setData] = useState(initData);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
+    setData(d => ({
+      ...d,
+      [event.target.name]: event.target.value
+    }));
+  };
+
+  return {
+    data,
+    handleInputChange
+  };
+}
+

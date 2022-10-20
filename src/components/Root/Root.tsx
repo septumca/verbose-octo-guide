@@ -20,6 +20,7 @@ function Root() {
       <div>
         {loggedIn && <button onClick={handleLogout} >Logout</button>}
         {!loggedIn && <Link to="/login">Login</Link>}
+        {!loggedIn && <Link to="/register">Register</Link>}
       </div>
       <div>
         <Outlet />

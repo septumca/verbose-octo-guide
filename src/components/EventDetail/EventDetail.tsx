@@ -130,6 +130,7 @@ function EventDetail() {
                 aria-label="Requirement name"
                 type="text"
                 name="name"
+                required={true}
               />
             </div>
             <div>

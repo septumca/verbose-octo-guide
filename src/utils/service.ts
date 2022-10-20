@@ -26,6 +26,15 @@ async function makeFetch<T>(method: string, uri_path: string, body: any = null):
   }
 }
 
+export async function verifyCaptcha(token: string): Promise<boolean> {
+  try {
+    await makeFetch('POST', 'verify_captcha', { token })
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
 export type AuthResponse = {
   id: number,
   token: string,
@@ -33,6 +42,10 @@ export type AuthResponse = {
 
 export const auth = async (login: string, sha256password: string): Promise<AuthResponse> => {
   return (await makeFetch('POST', 'authentificate', { username: login, password: sha256password })).json();
+}
+
+export const register = async (login: string, sha256password: string): Promise<User> => {
+  return (await makeFetch('POST', 'register', { username: login, password: sha256password })).json();
 }
 
 export type User = {

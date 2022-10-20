@@ -1,29 +1,28 @@
 import {
-  Form,
-  redirect,
   Navigate,
   useLocation,
   useNavigate,
 } from "react-router-dom";
 import { getUserData, isLoggedIn } from "../../utils/auth";
 import { CreateEvent, createEvent } from '../../utils/service';
-import { getFormData } from "../../utils/utils";
+import { removeEmptyStrings, useInputData } from "../../utils/utils";
 
-
-export async function action({ request, _params }: any) {
-  let data = await getFormData(request, { removeEmptyString: true });
-  data.creator = getUserData().id;
-  await createEvent(data as CreateEvent);
-  return redirect(`/events`);
-}
 
 function EventNew() {
   const loggedIn = isLoggedIn();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { data: eventData, handleInputChange } = useInputData({ name: '', description: '' });
 
   if (!loggedIn) {
     return <Navigate to="/login" state={{ from: pathname }} />
+  }
+
+  const handleCreate = async () => {
+    removeEmptyStrings(eventData);
+    eventData.creator = getUserData().id;
+    const event = await createEvent(eventData as CreateEvent);
+    return navigate(`/events/${event.id}`);
   }
 
   const handleCancel = () => {
@@ -31,7 +30,7 @@ function EventNew() {
   }
 
   return (
-    <Form method="post" id="contact-form">
+    <div>
       <div>
         <span>Name</span>
         <input
@@ -39,6 +38,8 @@ function EventNew() {
           aria-label="Event name"
           type="text"
           name="name"
+          required={true}
+          onChange={handleInputChange}
         />
       </div>
       <div>
@@ -46,13 +47,14 @@ function EventNew() {
         <textarea
           name="description"
           rows={6}
+          onChange={handleInputChange}
         />
       </div>
       <div>
-        <button type="submit">Save</button>
-        <button type="button" onClick={handleCancel}>Cancel</button>
+        <button onClick={handleCreate}>Save</button>
+        <button onClick={handleCancel}>Cancel</button>
       </div>
-    </Form>
+    </div>
   )
 }
 
