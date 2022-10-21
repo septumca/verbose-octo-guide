@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import { Fragment, useState } from "react";
 import {
   Link,
@@ -13,6 +14,7 @@ import {
   updateEvent,
   UpdateEvent
 } from '../../utils/service';
+import FadeDiv, { FadeDivWithPresence } from "../FadeDiv";
 import { Input, TextArea } from "../FieldsWIthConfirmation";
 import Loader from "../Loader";
 import NewRequirement from "../NewRequirement/NewRequirement";
@@ -142,29 +144,35 @@ function EventDetail() {
       {isLoggedIn && !isPariticipating && !isOwner && <div><button onClick={handleAddParticipation}>Participate</button></div>}
       <div className="participants">
         <div>Participants</div>
-        {participants.map(({ id, username }) =>
-          <div key={id}>
-            <Link  to={`/users/${id}`}>{username}</Link>
-            {id === userId && <button onClick={handleRemoveParticipation}>Leave</button>}
-          </div>
-        )}
+        <AnimatePresence>
+          {participants.map(({ id, username }) =>
+            <FadeDiv key={id}>
+              <Link  to={`/users/${id}`}>{username}</Link>
+              {id === userId && <button onClick={handleRemoveParticipation}>Leave</button>}
+            </FadeDiv>
+          )}
+        </AnimatePresence>
       </div>
       <div className="requirements">
         <div>Requirements</div>
-        {requirements.map(({ id, name, description, size }) =>
-          <Fragment key={id}>
-            <Requirement
-              id={id}
-              name={name}
-              description={description}
-              size={size}
-              fullfillments={fullfillments.filter(({ requirement }) => requirement === id)}
-              isOwner={isOwner}
-            />
-          </Fragment>
-        )}
-        {isOwner && !newRequirement && <button onClick={handleToggleNewRequirement}>Add new requirement</button>}
-        {newRequirement && <NewRequirement eventId={eventId} onSaveRequirement={handleToggleNewRequirement} onCancel={handleToggleNewRequirement} />}
+        <AnimatePresence>
+          {requirements.map(({ id, name, description, size }) =>
+            <FadeDiv key={id}>
+              <Requirement
+                id={id}
+                name={name}
+                description={description}
+                size={size}
+                fullfillments={fullfillments.filter(({ requirement }) => requirement === id)}
+                isOwner={isOwner}
+              />
+            </FadeDiv>
+          )}
+          </AnimatePresence>
+          <FadeDivWithPresence condition={newRequirement}>
+            <NewRequirement eventId={eventId} onSaveRequirement={handleToggleNewRequirement} onCancel={handleToggleNewRequirement} />
+          </FadeDivWithPresence>
+          {isOwner && !newRequirement && <button onClick={handleToggleNewRequirement}>Add new requirement</button>}
       </div>
     </div>
   )
