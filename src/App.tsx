@@ -8,13 +8,15 @@ import './App.css';
 
 import Root from './components/Root/Root';
 import Login from './components/Login/Login';
-import Events, { loader as eventListLoader } from './components/Events/Events';
-import EventDetail, { loader as eventDetailLoader } from './components/EventDetail/EventDetail';
-import UserDetail, { loader as userLoader } from "./components/UserDetail/UserDetail";
+import Events from './components/Events/Events';
+import EventDetail from './components/EventDetail/EventDetail';
+import UserDetail from "./components/UserDetail/UserDetail";
 import ErrorPage from "./components/ErrorPage";
 import EventNew from "./components/EventNew/EventNew";
 import UserNew from "./components/UserNew/UserNew";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+const queryClient = new QueryClient()
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -24,9 +26,9 @@ const router = createBrowserRouter(
       <Route path="/" element={<Root />} >
         <Route errorElement={<ErrorPage />} >
           <Route path="events/new" element={<EventNew />} />
-          <Route path="events/:id" element={<EventDetail />} loader={eventDetailLoader} />
-          <Route path="events" element={<Events />} loader={eventListLoader} />
-          <Route path="users/:id" element={<UserDetail />} loader={userLoader} />
+          <Route path="events/:id" element={<EventDetail />} />
+          <Route path="events" element={<Events />} />
+          <Route path="users/:id" element={<UserDetail />} />
         </Route>
       </Route>
     </>
@@ -35,7 +37,9 @@ const router = createBrowserRouter(
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   )
 }
 

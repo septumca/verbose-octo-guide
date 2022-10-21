@@ -1,9 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   Link,
-  useLoaderData,
   useNavigate,
 } from "react-router-dom";
-import { EventSummary, fetchEventList, User } from '../../utils/service';
+import { fetchEventList, User } from '../../utils/service';
+import Loader from "../Loader";
 import "./Events.css";
 
 type EventCardProps = {
@@ -12,10 +13,6 @@ type EventCardProps = {
   description?: string,
   creator: User,
 };
-
-export async function loader() {
-  return fetchEventList();
-}
 
 function EventCard({ id, name, description, creator }: EventCardProps) {
   const navigate = useNavigate();
@@ -32,7 +29,15 @@ function EventCard({ id, name, description, creator }: EventCardProps) {
 }
 
 function Events() {
-  const events = useLoaderData() as EventSummary[];
+  const { data: events, isLoading } = useQuery(
+    ['event', 'all'],
+    fetchEventList,
+    { initialData: [], refetchOnWindowFocus: false }
+  );
+
+  if (isLoading) {
+    return <Loader />
+  }
 
   return (
     <div className="container">

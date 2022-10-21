@@ -3,24 +3,24 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { getUserData, isLoggedIn } from "../../utils/auth";
+import { getAuthData } from "../../utils/auth";
 import { CreateEvent, createEvent } from '../../utils/service';
 import { removeEmptyStrings, useInputData } from "../../utils/utils";
 
 
 function EventNew() {
-  const loggedIn = isLoggedIn();
+  const { isLoggedIn, authData } = getAuthData();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { data: eventData, handleInputChange } = useInputData({ name: '', description: '' });
 
-  if (!loggedIn) {
+  if (!isLoggedIn) {
     return <Navigate to="/login" state={{ from: pathname }} />
   }
 
   const handleCreate = async () => {
     removeEmptyStrings(eventData);
-    eventData.creator = getUserData().id;
+    eventData.creator = authData?.id;
     const event = await createEvent(eventData as CreateEvent);
     return navigate(`/events/${event.id}`);
   }

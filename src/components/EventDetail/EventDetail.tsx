@@ -1,35 +1,87 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import {
   Link,
-  useLoaderData,
   useParams,
 } from "react-router-dom";
-import { getUserId, isLoggedIn } from "../../utils/auth";
+import { getAuthData } from "../../utils/auth";
 import {
-  createFullfillment,
   createParticipant,
-  createRequirement,
-  deleteFullfillment,
   deleteParticipant,
-  deleteRequirement,
   EventDetailData,
   fetchEvent
 } from '../../utils/service';
-import { getSynthenticEventFormData } from "../../utils/utils";
+import Loader from "../Loader";
+import NewRequirement from "../Requirement/NewRequirement";
 import Requirement from "../Requirement/Requirement";
 
-export async function loader({ params }: any) {
-  return fetchEvent(params.id);
+
+type EventDetailsMutator = (d: EventDetailData) => EventDetailData;
+
+export const QUERY_TAG = ['event', 'single'];
+export const useEventDetailsSuccess = (QUERY_TAG: string[]) => {
+  const qc = useQueryClient();
+
+  return (mutator: EventDetailsMutator) => {
+    qc.setQueryData<EventDetailData>(QUERY_TAG, d => {
+      if (d !== undefined) {
+        return mutator(d)
+      }
+      return d;
+    })
+  };
+}
+
+const useEventDetailQueries = (event_id: number) => {
+  const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
+  const { data, isLoading } = useQuery(QUERY_TAG, () => fetchEvent(event_id), { refetchOnWindowFocus: false });
+
+  const addParticipantMut = useMutation(
+    createParticipant,
+    {
+      onSuccess: (data) => {
+        onSuccessHandler(d => ({ ...d, participants: [...d.participants, { id: data.user, username: data.username }] }));
+      }
+    }
+  );
+  const removeParticipantMut = useMutation(
+    (userId: number) => deleteParticipant(userId, event_id),
+    {
+      onSuccess: (_data, userId) => {
+        onSuccessHandler(d => ({ ...d, participants: d.participants.filter(p => p.id !== userId)}));
+      }
+    }
+  );
+
+  return {
+    data,
+    isLoading,
+    addParticipantMut,
+    removeParticipantMut
+  }
 }
 
 function EventDetail() {
-  const loadedData = useLoaderData() as EventDetailData;
   const { id }: any = useParams();
-  const userId = getUserId();
-  const loggedIn = isLoggedIn();
-  const [data, setData] = useState(loadedData);
+  const eventId = parseInt(id, 10);
   const [newRequirement, setNewRequirement] = useState(false);
+  const {
+    data,
+    isLoading,
+    addParticipantMut,
+    removeParticipantMut
+  } = useEventDetailQueries(eventId);
 
+  if (isLoading) {
+    return <Loader />
+  }
+
+  if(data === undefined) {
+    return <div>Error placeholder</div>
+  }
+
+  const { isLoggedIn, authData } = getAuthData();
+  const userId = authData?.id;
   const { name, description, participants, creator, requirements, fullfillments } = data;
   const isOwner = userId !== null && userId === creator.id;
   const isPariticipating = userId !== null && (participants.some(({ id }) => id === userId));
@@ -38,51 +90,15 @@ function EventDetail() {
     setNewRequirement(r => !r);
   }
 
-  const handleAddRequirement = async (event: React.SyntheticEvent) => {
-    event.preventDefault();
-    const target = getSynthenticEventFormData(event);
-    let data = {
-      event: parseInt(id, 10),
-      name: target.name.value,
-      description: target.description.value || undefined,
-      size: parseInt(target.size.value, 10) || 1,
-    };
-
-    let requirement = await createRequirement(data);
-    setData(d => ({ ...d, requirements: [...d.requirements, requirement]}));
-    setNewRequirement(false);
-  }
-
-  const handleRemoveRequirement = async (id: number) => {
-    await deleteRequirement(id);
-    setData(d => ({ ...d, requirements: d.requirements.filter(r => r.id !== id)}));
-  }
-
   const handleAddParticipation = async () => {
-    if (userId) {
-      let { username } = await createParticipant({ user: userId, event: parseInt(id, 10) });
-      setData(d => ({ ...d, participants: [...d.participants, { id: userId, username }] }));
+    if (userId !== undefined) {
+      addParticipantMut.mutate({ event: eventId, user: userId });
     }
   }
 
   const handleRemoveParticipation = async () => {
-    if (userId) {
-      await deleteParticipant(userId, parseInt(id, 10));
-      setData(d => ({ ...d, participants: d.participants.filter(p => p.id !== userId)}));
-    }
-  }
-
-  const handleAddFullfillment = async (requirement_id: number) => {
-    if (userId) {
-      let new_fullfillment = await createFullfillment({ user: userId, requirement: requirement_id });
-      setData(d => ({ ...d, fullfillments: [...d.fullfillments, new_fullfillment] }));
-    }
-  }
-
-  const handleRemoveFullfillment = async (requirement_id: number) => {
-    if (userId) {
-      await deleteFullfillment(userId, requirement_id);
-      setData(d => ({ ...d, fullfillments: d.fullfillments.filter(p => p.requirement !== requirement_id || p.user.id !== userId )}));
+    if (userId !== undefined) {
+      removeParticipantMut.mutate(userId);
     }
   }
 
@@ -95,7 +111,7 @@ function EventDetail() {
         </div>
       </Link>
       <div>{description}</div>
-      {loggedIn && !isPariticipating && !isOwner && <div><button onClick={handleAddParticipation}>Participate</button></div>}
+      {isLoggedIn && !isPariticipating && !isOwner && <div><button onClick={handleAddParticipation}>Participate</button></div>}
       <div>Participants:
         {participants.map(({ id, username }) =>
           <div key={id}>
@@ -115,45 +131,11 @@ function EventDetail() {
               size={size}
               fullfillments={fullfillments.filter(({ requirement }) => requirement === id)}
               isOwner={isOwner}
-              onDelete={handleRemoveRequirement}
-              onAddFullfillment={handleAddFullfillment}
-              onRemoveFullfillment={handleRemoveFullfillment}
             />
           </Fragment>
         )}
         {isOwner && !newRequirement && <button onClick={handleToggleNewRequirement}>Add new requirement</button>}
-        {newRequirement && <form id="requirement-form" onSubmit={handleAddRequirement}>
-            <div>
-              <span>Name</span>
-              <input
-                placeholder="Requirement Name"
-                aria-label="Requirement name"
-                type="text"
-                name="name"
-                required={true}
-              />
-            </div>
-            <div>
-              <span>Size</span>
-              <input
-                placeholder="1"
-                aria-label="Requirement size"
-                type="number"
-                name="size"
-              />
-            </div>
-            <div>
-              <div>Description</div>
-              <textarea
-                name="description"
-                rows={6}
-              />
-            </div>
-            <div>
-              <button type="submit">Save</button>
-              <button type="button" onClick={handleToggleNewRequirement}>Cancel</button>
-            </div>
-          </form>}
+        {newRequirement && <NewRequirement eventId={eventId} onSaveRequirement={handleToggleNewRequirement} />}
       </div>
     </div>
   )

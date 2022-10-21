@@ -1,12 +1,13 @@
 import { Navigate, useLocation, useRouteError } from "react-router-dom";
-import { isLoggedIn } from "../utils/auth";
+import { getAuthData } from "../utils/auth";
 
 export default function ErrorPage() {
   const error = useRouteError() as any;
   const { pathname } = useLocation();
+  const { isLoggedIn } = getAuthData();
   console.error(error);
 
-  if(error.status === 401 && !isLoggedIn()) {
+  if(error.status === 401 && !isLoggedIn) {
     return <Navigate to="/login" state={{ from: pathname }} />
   }
 

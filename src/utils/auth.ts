@@ -3,6 +3,11 @@ import { json } from "react-router-dom";
 
 const TOKEN_KEY: string = 'ZMTWC_TOKEN';
 
+export type AuthData = {
+  id: number,
+  username: string,
+};
+
 export const saveToken = (token: string) => {
   localStorage.setItem(TOKEN_KEY, token);
 }
@@ -19,22 +24,18 @@ export const removeToken = () => {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-export const isLoggedIn = (): boolean => localStorage.getItem(TOKEN_KEY) !== null;
+export const getAuthData = () => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const isLoggedIn = token !== null;
 
-export const getUserId = (): number | null => {
-  try {
-    let { sub } = jwt_decode(getToken()) as any;
-    return parseInt(sub, 10);
-  } catch(e) {
-    console.error('Error getting userId', e);
-    return null;
+  let data: AuthData | undefined = undefined;
+  if (isLoggedIn) {
+    const token_data = jwt_decode(token) as any;
+    data = {
+      id: parseInt(token_data.sub, 10),
+      username: token_data.username
+    };
   }
-}
 
-export const getUserData = (): { id: number, username: string } => {
-  let { sub, username } = jwt_decode(getToken()) as any;
-  return {
-    id: parseInt(sub, 10),
-    username
-  };
+  return { isLoggedIn, authData: data };
 }

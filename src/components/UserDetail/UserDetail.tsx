@@ -1,22 +1,25 @@
+import { useQuery } from "@tanstack/react-query";
 import {
-  useLoaderData,
+  useParams,
 } from "react-router-dom";
-import { fetchUser, User } from '../../utils/service';
+import { fetchUser } from '../../utils/service';
+import Loader from "../Loader";
 
-type LoaderResponse = User;
-
-export async function loader({ params }: any) {
-  return await fetchUser(params.id);
-}
+export const QUERY_TAG = ['user', 'single'];
 
 function UserDetail() {
-  const { id, username } = useLoaderData() as LoaderResponse;
+  const { id: userId }: any = useParams();
+  const { data, isLoading } = useQuery(QUERY_TAG, () => fetchUser(userId), { refetchOnWindowFocus: false });
+
+  if (isLoading) {
+    return <Loader />
+  }
 
   return (
     <div>
       <div>User details:</div>
-      <div>{id}</div>
-      <div>{username}</div>
+      <div>{data?.id}</div>
+      <div>{data?.username}</div>
     </div>
   )
 }

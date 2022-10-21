@@ -1,8 +1,45 @@
+import { useMutation } from "@tanstack/react-query";
 import {
   Link,
 } from "react-router-dom";
-import { getUserId, isLoggedIn } from "../../utils/auth";
-import { User } from "../../utils/service";
+import { getAuthData } from "../../utils/auth";
+import { createFullfillment, deleteFullfillment, deleteRequirement, User } from "../../utils/service";
+import { QUERY_TAG, useEventDetailsSuccess } from "../EventDetail/EventDetail";
+
+const useRequirementQueries = (requirement_id: number) => {
+  const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
+
+  const addFullfillmentMut = useMutation(
+    createFullfillment,
+    {
+      onSuccess: (data) => {
+        onSuccessHandler(d => ({ ...d, fullfillments: [...d.fullfillments, data] }));
+      }
+    }
+  );
+  const removeFullfillmentMut = useMutation(
+    (userId: number) => deleteFullfillment(userId, requirement_id),
+    {
+      onSuccess: (_data, userId) => {
+        onSuccessHandler(d => ({ ...d, fullfillments: d.fullfillments.filter(p => p.requirement !== requirement_id || p.user.id !== userId )}));
+      }
+    }
+  );
+  const removeRequirementMut = useMutation(
+    deleteRequirement,
+    {
+      onSuccess: (_data, id) => {
+        onSuccessHandler(d => ({ ...d, requirements: d.requirements.filter(r => r.id !== id)}));
+      }
+    }
+  );
+
+  return {
+    addFullfillmentMut,
+    removeFullfillmentMut,
+    removeRequirementMut
+  }
+}
 
 type RequirementProps = {
   id: number,
@@ -11,9 +48,6 @@ type RequirementProps = {
   size: number,
   fullfillments: { requirement: number, user: User }[],
   isOwner: boolean,
-  onDelete: (id: number) => {},
-  onAddFullfillment: (id: number) => {},
-  onRemoveFullfillment: (id: number) => {},
 }
 
 function Requirement({
@@ -23,24 +57,30 @@ function Requirement({
   size,
   fullfillments,
   isOwner,
-  onDelete,
-  onAddFullfillment,
-  onRemoveFullfillment
 }: RequirementProps) {
-  const loggedIn = isLoggedIn();
-  const userId = getUserId();
-  const hadFullfilled = userId && fullfillments.some(({ user: { id } }) => id === userId);
+  const { isLoggedIn, authData } = getAuthData();
+  const userId = authData?.id;
+  const hadFullfilled = userId !== null && fullfillments.some(({ user: { id } }) => id === userId);
+  const {
+    addFullfillmentMut,
+    removeFullfillmentMut,
+    removeRequirementMut
+  } = useRequirementQueries(id);
 
   const handleAddFullfillment = () => {
-    onAddFullfillment(id);
+    if (userId !== undefined) {
+      addFullfillmentMut.mutate({ user: userId, requirement: id });
+    }
   }
 
   const handleRemoveFullfillment = () => {
-    onRemoveFullfillment(id);
+    if (userId !== undefined) {
+      removeFullfillmentMut.mutate(userId);
+    }
   }
 
   const handleDelete = () => {
-    onDelete(id);
+    removeRequirementMut.mutate(id);
   }
 
   return (
@@ -48,7 +88,7 @@ function Requirement({
       <div>{name}</div>
       <div>{description}</div>
       {isOwner && <div><button onClick={handleDelete}>Delete</button></div>}
-      {loggedIn && !hadFullfilled && size > fullfillments.length && <div><button onClick={handleAddFullfillment}>Fullfull</button></div>}
+      {isLoggedIn && !hadFullfilled && size > fullfillments.length && <div><button onClick={handleAddFullfillment}>Fullfull</button></div>}
       <div>{fullfillments.length}/{size}</div>
       <div>Fullfilled by:
         {fullfillments.map(({ user: { id, username } }) =>
