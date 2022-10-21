@@ -1,4 +1,4 @@
-import { SyntheticEvent, useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 
 export type GetFormDataOptions = {
   removeEmptyString?: boolean,
@@ -42,3 +42,26 @@ export const useInputData = (initData: {[x: string]: any }) => {
   };
 }
 
+type DebouncedTimeout<T> = (data: T) => void;
+export const useDebouncedChanges = <T>(
+  delay: number,
+  initialData: T,
+  onTimeout: DebouncedTimeout<T>,
+) => {
+  const [data, setData] = useState(initialData);
+
+  const update = (data: T) => {
+    setData(d => ({ ...d, ...data }));
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const handler = setTimeout(() => { onTimeout(data); }, delay);
+    return () => { clearTimeout(handler); };
+  }, [data]);
+
+  return {
+    data,
+    update
+  };
+}

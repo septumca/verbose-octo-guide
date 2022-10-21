@@ -9,12 +9,15 @@ import {
   createParticipant,
   deleteParticipant,
   EventDetailData,
-  fetchEvent
+  fetchEvent,
+  updateEvent,
+  UpdateEvent
 } from '../../utils/service';
+import { Input, TextArea } from "../FieldsWIthConfirmation";
 import Loader from "../Loader";
-import NewRequirement from "../Requirement/NewRequirement";
+import NewRequirement from "../NewRequirement/NewRequirement";
 import Requirement from "../Requirement/Requirement";
-
+import './EventDetail.css';
 
 type EventDetailsMutator = (d: EventDetailData) => EventDetailData;
 
@@ -52,10 +55,19 @@ const useEventDetailQueries = (event_id: number) => {
       }
     }
   );
+  const updateEventMut = useMutation(
+    (data: UpdateEvent) => updateEvent(event_id, data),
+    {
+      onSuccess: (_data, variables) => {
+        onSuccessHandler(d => ({ ...d,  ...variables }));
+      }
+    }
+  );
 
   return {
     data,
     isLoading,
+    updateEventMut,
     addParticipantMut,
     removeParticipantMut
   }
@@ -68,6 +80,7 @@ function EventDetail() {
   const {
     data,
     isLoading,
+    updateEventMut,
     addParticipantMut,
     removeParticipantMut
   } = useEventDetailQueries(eventId);
@@ -86,6 +99,11 @@ function EventDetail() {
   const isOwner = userId !== null && userId === creator.id;
   const isPariticipating = userId !== null && (participants.some(({ id }) => id === userId));
 
+  const handleUpdateEvent = (transform: (value: string) => UpdateEvent) => (value: string) => {
+    let payload = transform(value);
+    updateEventMut.mutate(payload);
+  }
+
   const handleToggleNewRequirement = () => {
     setNewRequirement(r => !r);
   }
@@ -103,16 +121,27 @@ function EventDetail() {
   }
 
   return (
-    <div>
-      <div>{name}</div>
+    <div className="eventdetail_container ">
+      <Input
+        label="name"
+        value={name}
+        onSetValue={handleUpdateEvent((value: string) => ({ name: value }))}
+        readonly={isOwner}
+      />
       <Link to={`/users/${creator.id}`}>
         <div>
           {creator.username}
         </div>
       </Link>
-      <div>{description}</div>
+      <TextArea
+        label="description"
+        value={description ?? ''}
+        onSetValue={handleUpdateEvent((value: string) => ({ description: value }))}
+        readonly={isOwner}
+      />
       {isLoggedIn && !isPariticipating && !isOwner && <div><button onClick={handleAddParticipation}>Participate</button></div>}
-      <div>Participants:
+      <div className="participants">
+        <div>Participants</div>
         {participants.map(({ id, username }) =>
           <div key={id}>
             <Link  to={`/users/${id}`}>{username}</Link>
@@ -120,8 +149,8 @@ function EventDetail() {
           </div>
         )}
       </div>
-      <div>
-        Requirements:
+      <div className="requirements">
+        <div>Requirements</div>
         {requirements.map(({ id, name, description, size }) =>
           <Fragment key={id}>
             <Requirement
@@ -135,7 +164,7 @@ function EventDetail() {
           </Fragment>
         )}
         {isOwner && !newRequirement && <button onClick={handleToggleNewRequirement}>Add new requirement</button>}
-        {newRequirement && <NewRequirement eventId={eventId} onSaveRequirement={handleToggleNewRequirement} />}
+        {newRequirement && <NewRequirement eventId={eventId} onSaveRequirement={handleToggleNewRequirement} onCancel={handleToggleNewRequirement} />}
       </div>
     </div>
   )

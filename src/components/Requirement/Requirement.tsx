@@ -3,8 +3,10 @@ import {
   Link,
 } from "react-router-dom";
 import { getAuthData } from "../../utils/auth";
-import { createFullfillment, deleteFullfillment, deleteRequirement, User } from "../../utils/service";
+import { createFullfillment, deleteFullfillment, deleteRequirement, updateRequirement, UpdateRequirement, User } from "../../utils/service";
 import { QUERY_TAG, useEventDetailsSuccess } from "../EventDetail/EventDetail";
+import { Input, TextArea } from "../FieldsWIthConfirmation";
+import "./Requirement.css";
 
 const useRequirementQueries = (requirement_id: number) => {
   const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
@@ -33,11 +35,20 @@ const useRequirementQueries = (requirement_id: number) => {
       }
     }
   );
+  const updateRequirementMut = useMutation(
+    (data: UpdateRequirement) => updateRequirement(requirement_id, data),
+    {
+      onSuccess: (_data, variables) => {
+        onSuccessHandler(d => ({ ...d, requirements: d.requirements.map(r => r.id === requirement_id ? { ...r, ...variables } : r)}));
+      }
+    }
+  );
 
   return {
     addFullfillmentMut,
     removeFullfillmentMut,
-    removeRequirementMut
+    removeRequirementMut,
+    updateRequirementMut,
   }
 }
 
@@ -64,7 +75,8 @@ function Requirement({
   const {
     addFullfillmentMut,
     removeFullfillmentMut,
-    removeRequirementMut
+    removeRequirementMut,
+    updateRequirementMut,
   } = useRequirementQueries(id);
 
   const handleAddFullfillment = () => {
@@ -83,10 +95,25 @@ function Requirement({
     removeRequirementMut.mutate(id);
   }
 
+  const handleUpdateRequirement = (transform: (value: string) => UpdateRequirement) => (value: string) => {
+    let payload = transform(value);
+    updateRequirementMut.mutate(payload);
+  }
+
   return (
-    <div>
-      <div>{name}</div>
-      <div>{description}</div>
+    <div className="requirement_container">
+      <Input
+        label="name"
+        value={name}
+        onSetValue={handleUpdateRequirement((value: string) => ({ name: value }))}
+        readonly={isOwner}
+      />
+      <TextArea
+        label="description"
+        value={description ?? ''}
+        onSetValue={handleUpdateRequirement((value: string) => ({ description: value }))}
+        readonly={isOwner}
+      />
       {isOwner && <div><button onClick={handleDelete}>Delete</button></div>}
       {isLoggedIn && !hadFullfilled && size > fullfillments.length && <div><button onClick={handleAddFullfillment}>Fullfull</button></div>}
       <div>{fullfillments.length}/{size}</div>

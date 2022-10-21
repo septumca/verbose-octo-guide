@@ -102,13 +102,13 @@ export const createEvent = async (data: CreateEvent): Promise<EventSummary> => {
   return (await makeFetch('POST', 'event', data)).json();
 }
 
-export type UpdateEvent = {
-  name?: string,
-  description?: string
-}
+export type UpdateEvent = Partial<{
+  name: string,
+  description: string
+}>
 
-export const updateEvent = async (data: UpdateEvent): Promise<void> => {
-  await makeFetch('PUT', 'event', data);
+export const updateEvent = async (id: number, data: UpdateEvent): Promise<void> => {
+  await makeFetch('PUT', `event/${id}`, data);
 }
 
 export type CreateRequirement = {
@@ -118,10 +118,20 @@ export type CreateRequirement = {
   event: number,
 }
 
+export type UpdateRequirement = Partial<{
+  name: string,
+  description: string,
+  size: number,
+}>
+
 export type RequirementResponse = Requirement & { id: number };
 
 export const createRequirement = async (data: CreateRequirement): Promise<RequirementResponse> => {
   return (await makeFetch('POST', 'requirement', data)).json();
+}
+
+export const updateRequirement = async (id: number, data: UpdateRequirement): Promise<void> => {
+  await makeFetch('PUT', `requirement/${id}`, data);
 }
 
 export const deleteRequirement = async (id: number): Promise<void> => {

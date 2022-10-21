@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { CreateRequirement, createRequirement } from "../../utils/service";
 import { removeEmptyStrings, useInputData } from "../../utils/utils";
 import { QUERY_TAG, useEventDetailsSuccess } from "../EventDetail/EventDetail";
+import "./NewRequirement.css";
 
 const useRequirementNewQueries = () => {
   const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
@@ -23,11 +24,13 @@ const useRequirementNewQueries = () => {
 type RequirementProps = {
   eventId: number,
   onSaveRequirement: () => void,
+  onCancel: () => void,
 }
 
 function NewRequirement({
   eventId,
   onSaveRequirement,
+  onCancel,
 }: RequirementProps) {
   const { data: reqData, handleInputChange } = useInputData({ name: '', description: '', size: 1 });
   const { addRequirementMut } = useRequirementNewQueries();
@@ -36,6 +39,7 @@ function NewRequirement({
     let data = {
       ...reqData,
       event: eventId,
+      size: parseInt(reqData.size, 10)
     } as CreateRequirement;
     removeEmptyStrings(data);
     await addRequirementMut.mutate(data);
@@ -43,7 +47,7 @@ function NewRequirement({
   }
 
   return (
-    <div>
+    <div className="newrequirement_container">
       <div>
         <span>Name</span>
         <input
@@ -75,6 +79,7 @@ function NewRequirement({
       </div>
       <div>
         <button disabled={reqData.name === ''} onClick={handleSave}>Save</button>
+        <button onClick={onCancel}>Cancel</button>
       </div>
     </div>
   )
