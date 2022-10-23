@@ -4,9 +4,10 @@ import {
 } from "react-router-dom";
 import { getAuthData } from "../../utils/auth";
 import { createFullfillment, deleteFullfillment, deleteRequirement, updateRequirement, UpdateRequirement, User } from "../../utils/service";
+import { useToggler } from "../../utils/utils";
+import { IconButton } from "../Buttons";
 import { QUERY_TAG, useEventDetailsSuccess } from "../EventDetail/EventDetail";
 import { Input, TextArea } from "../FieldsWIthConfirmation";
-import "./Requirement.css";
 
 const useRequirementQueries = (requirement_id: number) => {
   const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
@@ -78,6 +79,7 @@ function Requirement({
     removeRequirementMut,
     updateRequirementMut,
   } = useRequirementQueries(id);
+  const [detailsVisible, toggleDetailsVisible] = useToggler(false);
 
   const handleAddFullfillment = () => {
     if (userId !== undefined) {
@@ -101,30 +103,34 @@ function Requirement({
   }
 
   return (
-    <div className="requirement_container">
+    <div>
       <Input
         label="name"
         value={name}
         onSetValue={handleUpdateRequirement((value: string) => ({ name: value }))}
         readonly={isOwner}
       />
-      <TextArea
+      <div></div>
+      {isOwner && <div><IconButton onClick={handleDelete} title="delete requirement">🗑️</IconButton></div>}
+      <div>
+        {isLoggedIn && !hadFullfilled && size > fullfillments.length && <IconButton onClick={handleAddFullfillment} title="fullfill">✔️</IconButton>}
+        <IconButton title="see details" onClick={toggleDetailsVisible}>👁️‍🗨️</IconButton>
+        <span>{fullfillments.length}/{size}</span>
+      </div>
+      {detailsVisible && <TextArea
         label="description"
         value={description ?? ''}
         onSetValue={handleUpdateRequirement((value: string) => ({ description: value }))}
         readonly={isOwner}
-      />
-      {isOwner && <div><button onClick={handleDelete}>Delete</button></div>}
-      {isLoggedIn && !hadFullfilled && size > fullfillments.length && <div><button onClick={handleAddFullfillment}>Fullfull</button></div>}
-      <div>{fullfillments.length}/{size}</div>
-      <div>Fullfilled by:
+      />}
+      {detailsVisible && <div>Fullfilled by:
         {fullfillments.map(({ user: { id, username } }) =>
           <div key={id}>
             <Link to={`/users/${id}`}>{username}</Link>
-            {id === userId && <button onClick={handleRemoveFullfillment}>Leave</button>}
+            {id === userId && <IconButton onClick={handleRemoveFullfillment} title="leave">🏃💨</IconButton>}
           </div>
         )}
-      </div>
+      </div>}
     </div>
   )
 }

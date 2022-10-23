@@ -42,6 +42,12 @@ export const useInputData = (initData: {[x: string]: any }) => {
   };
 }
 
+export const useToggler = (initValue: boolean): [boolean, () => void] => {
+  const [val, setVal] = useState(initValue);
+  const toggle = () => { setVal(v => !v); };
+  return [val, toggle];
+}
+
 type DebouncedTimeout<T> = (data: T) => void;
 export const useDebouncedChanges = <T>(
   delay: number,

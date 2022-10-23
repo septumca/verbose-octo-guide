@@ -14,12 +14,14 @@ import {
   updateEvent,
   UpdateEvent
 } from '../../utils/service';
-import FadeDiv, { FadeDivWithPresence } from "../FadeDiv";
+import { useToggler } from "../../utils/utils";
+import { IconButton } from "../Buttons";
+import { FadeDiv, FadeDivWithPresence } from "../FadeDiv";
 import { Input, TextArea } from "../FieldsWIthConfirmation";
+import HorizontalLine from "../HorizontalLine";
 import Loader from "../Loader";
 import NewRequirement from "../NewRequirement/NewRequirement";
 import Requirement from "../Requirement/Requirement";
-import './EventDetail.css';
 
 type EventDetailsMutator = (d: EventDetailData) => EventDetailData;
 
@@ -78,7 +80,7 @@ const useEventDetailQueries = (event_id: number) => {
 function EventDetail() {
   const { id }: any = useParams();
   const eventId = parseInt(id, 10);
-  const [newRequirement, setNewRequirement] = useState(false);
+  const [newRequirement, handleToggleNewRequirement] = useToggler(false);
   const {
     data,
     isLoading,
@@ -106,10 +108,6 @@ function EventDetail() {
     updateEventMut.mutate(payload);
   }
 
-  const handleToggleNewRequirement = () => {
-    setNewRequirement(r => !r);
-  }
-
   const handleAddParticipation = async () => {
     if (userId !== undefined) {
       addParticipantMut.mutate({ event: eventId, user: userId });
@@ -123,26 +121,29 @@ function EventDetail() {
   }
 
   return (
-    <div className="eventdetail_container ">
+    <div className="mx-2 my-4">
       <Input
         label="name"
         value={name}
         onSetValue={handleUpdateEvent((value: string) => ({ name: value }))}
-        readonly={isOwner}
+        readonly={!isOwner}
       />
+      <HorizontalLine />
       <Link to={`/users/${creator.id}`}>
         <div>
-          {creator.username}
+          <div>Created by</div>
+          <div>{creator.username}</div>
         </div>
       </Link>
+      <HorizontalLine />
       <TextArea
         label="description"
         value={description ?? ''}
         onSetValue={handleUpdateEvent((value: string) => ({ description: value }))}
-        readonly={isOwner}
+        readonly={!isOwner}
       />
       {isLoggedIn && !isPariticipating && !isOwner && <div><button onClick={handleAddParticipation}>Participate</button></div>}
-      <div className="participants">
+      <div className="mt-6">
         <div>Participants</div>
         <AnimatePresence>
           {participants.map(({ id, username }) =>
@@ -153,26 +154,28 @@ function EventDetail() {
           )}
         </AnimatePresence>
       </div>
-      <div className="requirements">
+      <div className="mt-6">
         <div>Requirements</div>
-        <AnimatePresence>
-          {requirements.map(({ id, name, description, size }) =>
-            <FadeDiv key={id}>
-              <Requirement
-                id={id}
-                name={name}
-                description={description}
-                size={size}
-                fullfillments={fullfillments.filter(({ requirement }) => requirement === id)}
-                isOwner={isOwner}
-              />
-            </FadeDiv>
-          )}
-          </AnimatePresence>
+        <div>
           <FadeDivWithPresence condition={newRequirement}>
             <NewRequirement eventId={eventId} onSaveRequirement={handleToggleNewRequirement} onCancel={handleToggleNewRequirement} />
           </FadeDivWithPresence>
-          {isOwner && !newRequirement && <button onClick={handleToggleNewRequirement}>Add new requirement</button>}
+          <AnimatePresence>
+            {requirements.map(({ id, name, description, size }) =>
+              <FadeDiv key={id}>
+                <Requirement
+                  id={id}
+                  name={name}
+                  description={description}
+                  size={size}
+                  fullfillments={fullfillments.filter(({ requirement }) => requirement === id)}
+                  isOwner={isOwner}
+                />
+              </FadeDiv>
+            )}
+          </AnimatePresence>
+        </div>
+        {isOwner && !newRequirement && <IconButton onClick={handleToggleNewRequirement}>➕ requirement</IconButton>}
       </div>
     </div>
   )

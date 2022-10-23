@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function FadeDiv({ children }: any) {
+export function FadeDiv({ children }: any) {
   return (<motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}

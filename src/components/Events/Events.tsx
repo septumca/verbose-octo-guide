@@ -5,8 +5,6 @@ import {
 } from "react-router-dom";
 import { fetchEventList, User } from '../../utils/service';
 import Loader from "../Loader";
-import "./Events.css";
-
 type EventCardProps = {
   id: number,
   name: string,
@@ -21,9 +19,11 @@ function EventCard({ id, name, description, creator }: EventCardProps) {
     navigate(`/events/${id}`);
   }
 
-  return <div className="card" onClick={handleClick}>
+  return <div  className="container cursor-pointer w-full items-left p-4 justify-center bg-white dark:bg-gray-800 rounded-lg shadow my-2 border border-gray-700" onClick={handleClick}>
     <div>{name}</div>
-    <div>{creator.username}</div>
+    <div>
+      {creator.username}
+    </div>
     {description && <div>{description}</div>}
   </div>
 }
@@ -40,18 +40,20 @@ function Events() {
   }
 
   return (
-    <div className="container">
-      {events.map(({ id, name, description, creator }) =>
-        <EventCard
-          key={id}
-          id={id}
-          name={name}
-          description={description}
-          creator={creator}
-        />
-      )}
-      <div>
+    <div className="grid grid-cols-1 gap-8">
+      <div className="container flex flex-col mx-auto w-full items-center justify-center bg-white dark:bg-gray-800">
         <Link to="/events/new">New Event</Link>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mx-8">
+        {events.map(({ id, name, description, creator }) =>
+          <EventCard
+            key={id}
+            id={id}
+            name={name}
+            description={description}
+            creator={creator}
+          />
+        )}
       </div>
     </div>
   )

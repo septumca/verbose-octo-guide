@@ -2,7 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { CreateRequirement, createRequirement } from "../../utils/service";
 import { removeEmptyStrings, useInputData } from "../../utils/utils";
 import { QUERY_TAG, useEventDetailsSuccess } from "../EventDetail/EventDetail";
-import "./NewRequirement.css";
 
 const useRequirementNewQueries = () => {
   const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
@@ -47,7 +46,7 @@ function NewRequirement({
   }
 
   return (
-    <div className="newrequirement_container">
+    <div>
       <div>
         <span>Name</span>
         <input
