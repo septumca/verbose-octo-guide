@@ -1,22 +1,12 @@
 import { useEffect, useRef } from "react";
-import { useToggler } from "../utils/utils";
-import { IconButton } from "./Buttons";
-type InputProps = {
-  label: string,
-  placeholder?: string,
-  required?: boolean,
-  readonly?: boolean;
-  value: string,
-  onSetValue: (data: string) => void,
-}
+import { useToggler } from "../../utils/utils";
+import { IconButton } from "../Button/IconButton";
 
-function InputLabel({ children }: any) {
-  return <div className="text-base leading-7 text-blueGray-500">{children}</div>
-}
+type ValueSetter = (data: string) => void;
 
-export function Input({ label, placeholder, required, readonly, value, onSetValue }: InputProps) {
+function useSetupInput<T extends HTMLInputElement | HTMLTextAreaElement>(value: string, onSetValue: ValueSetter): [boolean, React.RefObject<T>, VoidFunction, VoidFunction, VoidFunction] {
   const [editing, toggleEditing] = useToggler(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<T>(null);
   const handleConfirm = () => {
     const newValue = inputRef.current?.value;
     if (newValue === undefined) {
@@ -28,6 +18,12 @@ export function Input({ label, placeholder, required, readonly, value, onSetValu
     }
     onSetValue(newValue)
   }
+  const handleCancel = () => {
+    if (inputRef.current !== null) {
+      inputRef.current.value = value;
+    }
+    toggleEditing();
+  }
 
   useEffect(() => {
     if (editing && inputRef.current !== null) {
@@ -35,14 +31,30 @@ export function Input({ label, placeholder, required, readonly, value, onSetValu
     }
   }, [editing]);
 
+  return [editing, inputRef, toggleEditing, handleConfirm, handleCancel];
+}
+
+export type InputProps = {
+  label: string,
+  placeholder?: string,
+  required?: boolean,
+  readonly?: boolean;
+  value: string,
+  onSetValue: ValueSetter,
+}
+
+function InputLabel({ children }: any) {
+  return <div className="text-base leading-7 text-blueGray-500">{children}</div>
+}
+
+export function Input({ label, placeholder, required, readonly=false, value, onSetValue }: InputProps) {
+  const [ editing, inputRef, toggleEditing, handleConfirm, handleCancel ] = useSetupInput<HTMLInputElement>(value, onSetValue);
 
   if (!editing) {
     return (
       <div className="flex">
         <InputLabel>{value}</InputLabel>
-        {!readonly && <div className="ml-2">
-          <IconButton onClick={toggleEditing}>⚙️</IconButton>
-        </div>}
+        {!readonly && <div className="ml-2"><IconButton onClick={toggleEditing}>⚙️</IconButton></div>}
       </div>
     );
   }
@@ -57,7 +69,7 @@ export function Input({ label, placeholder, required, readonly, value, onSetValu
           {editing && <IconButton title="confirm" onClick={handleConfirm}>✔️</IconButton>}
         </div>
         <div className="ml-2">
-          {editing && <IconButton title="close" onClick={toggleEditing}>❌</IconButton>}
+          {editing && <IconButton title="close" onClick={handleCancel}>❌</IconButton>}
         </div>
       </div>
       <input
@@ -76,39 +88,15 @@ export function Input({ label, placeholder, required, readonly, value, onSetValu
 }
 
 export function TextArea({ label, placeholder, required, value, readonly, onSetValue }: InputProps) {
-  const [editing, toggleEditing] = useToggler(false);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const handleConfirm = () => {
-    const newValue = inputRef.current?.value;
-    if (newValue === undefined) {
-      return;
-    }
-    toggleEditing();
-    if (newValue === value) {
-      return;
-    }
-    onSetValue(newValue)
-  }
-
-  const handleInputClick = () => {
-    if (!readonly && !editing) {
-      toggleEditing();
-    }
-  }
-
-  useEffect(() => {
-    if (editing && inputRef.current !== null) {
-      inputRef.current.focus();
-    }
-  }, [editing]);
+  const [ editing, inputRef, toggleEditing, handleConfirm, handleCancel ] = useSetupInput<HTMLTextAreaElement>(value, onSetValue);
 
   return (
     <div>
       <div className="flex mt-1">
         <InputLabel>{label}</InputLabel>
         {editing && <div className="ml-2"><IconButton title="confirm" onClick={handleConfirm}>✔️</IconButton></div>}
-        {editing && <div className="ml-2"><IconButton title="close" onClick={toggleEditing}>❌</IconButton></div>}
-        {!readonly && !editing && <div className="ml-2"><IconButton onClick={handleInputClick}>⚙️</IconButton></div>}
+        {editing && <div className="ml-2"><IconButton title="close" onClick={handleCancel}>❌</IconButton></div>}
+        {!readonly && !editing && <div className="ml-2"><IconButton onClick={toggleEditing}>⚙️</IconButton></div>}
       </div>
       <textarea
         className="w-full h-32 p-2 mt-2 text-base text-blueGray-500 transition duration-500 ease-in-out transform bg-white border rounded-lg focus:border-blue-500 focus:outline-none focus:shadow-outline focus:ring-2 ring-offset-current ring-offset-2 apearance-none autoexpand"

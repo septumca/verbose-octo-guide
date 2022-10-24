@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import { Fragment, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import {
   Link,
   useParams,
@@ -15,9 +14,9 @@ import {
   UpdateEvent
 } from '../../utils/service';
 import { useToggler } from "../../utils/utils";
-import { IconButton } from "../Buttons";
+import { IconButton } from "../Button/IconButton";
 import { FadeDiv, FadeDivWithPresence } from "../FadeDiv";
-import { Input, TextArea } from "../FieldsWIthConfirmation";
+import { Input, TextArea } from "../Input/Input";
 import HorizontalLine from "../HorizontalLine";
 import Loader from "../Loader";
 import NewRequirement from "../NewRequirement/NewRequirement";

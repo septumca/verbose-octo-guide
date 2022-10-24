@@ -5,9 +5,9 @@ import {
 import { getAuthData } from "../../utils/auth";
 import { createFullfillment, deleteFullfillment, deleteRequirement, updateRequirement, UpdateRequirement, User } from "../../utils/service";
 import { useToggler } from "../../utils/utils";
-import { IconButton } from "../Buttons";
+import { IconButton } from "../Button/IconButton";
 import { QUERY_TAG, useEventDetailsSuccess } from "../EventDetail/EventDetail";
-import { Input, TextArea } from "../FieldsWIthConfirmation";
+import { Input, TextArea } from "../Input/Input";
 
 const useRequirementQueries = (requirement_id: number) => {
   const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
