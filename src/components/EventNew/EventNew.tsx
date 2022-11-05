@@ -6,13 +6,15 @@ import {
 import { getAuthData } from "../../utils/auth";
 import { CreateEvent, createEvent } from '../../utils/service';
 import { removeEmptyStrings, useInputData } from "../../utils/utils";
+import { TIME_FORMAT } from "../Input/Input";
+import moment from 'moment';
 
 
 function EventNew() {
   const { isLoggedIn, authData } = getAuthData();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { data: eventData, handleInputChange } = useInputData({ name: '', description: '' });
+  const { data: eventData, handleInputChange } = useInputData({ name: '', time: '', description: '' });
 
   if (!isLoggedIn) {
     return <Navigate to="/login" state={{ from: pathname }} />
@@ -21,6 +23,7 @@ function EventNew() {
   const handleCreate = async () => {
     removeEmptyStrings(eventData);
     eventData.creator = authData?.id;
+    eventData.time = moment(eventData.time, TIME_FORMAT).unix();
     const event = await createEvent(eventData as CreateEvent);
     return navigate(`/events/${event.id}`);
   }
@@ -38,6 +41,17 @@ function EventNew() {
           aria-label="Event name"
           type="text"
           name="name"
+          required={true}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div>
+        <span>Time</span>
+        <input
+          placeholder="Event Time"
+          aria-label="Event time"
+          type="datetime-local"
+          name="time"
           required={true}
           onChange={handleInputChange}
         />

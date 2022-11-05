@@ -3,6 +3,8 @@ import { useToggler } from "../../utils/utils";
 import { IconButton } from "../Button/IconButton";
 
 type ValueSetter = (data: string) => void;
+export const TIME_FORMAT = 'YYYY-MM-DDTHH:mm';
+export const TIME_FORMAT_PRETTY = 'D.M. YYYY HH:mm'
 
 function useSetupInput<T extends HTMLInputElement | HTMLTextAreaElement>(value: string, onSetValue: ValueSetter): [boolean, React.RefObject<T>, VoidFunction, VoidFunction, VoidFunction] {
   const [editing, toggleEditing] = useToggler(false);
@@ -36,10 +38,12 @@ function useSetupInput<T extends HTMLInputElement | HTMLTextAreaElement>(value: 
 
 export type InputProps = {
   label: string,
+  type?: string,
   placeholder?: string,
   required?: boolean,
   readonly?: boolean;
   value: string,
+  displayValue?: string,
   onSetValue: ValueSetter,
 }
 
@@ -47,13 +51,14 @@ function InputLabel({ children }: any) {
   return <div className="text-base leading-7 text-blueGray-500">{children}</div>
 }
 
-export function Input({ label, placeholder, required, readonly=false, value, onSetValue }: InputProps) {
+export function Input({ label, displayValue, placeholder, required, type="text", readonly=false, value, onSetValue }: InputProps) {
   const [ editing, inputRef, toggleEditing, handleConfirm, handleCancel ] = useSetupInput<HTMLInputElement>(value, onSetValue);
+  const _displayValue = displayValue ?? value;
 
   if (!editing) {
     return (
       <div className="flex">
-        <InputLabel>{value}</InputLabel>
+        <InputLabel>{_displayValue}</InputLabel>
         {!readonly && <div className="ml-2"><IconButton onClick={toggleEditing}>⚙️</IconButton></div>}
       </div>
     );
@@ -75,9 +80,9 @@ export function Input({ label, placeholder, required, readonly=false, value, onS
       <input
         className="w-full p-2 mr-4 mt-2 text-base text-black transition duration-500 ease-in-out transform rounded-md border focus:border-blueGray-500 focus:bg-white focus:outline-none focus:shadow-outline focus:ring-2 ring-offset-current ring-offset-2"
         ref={inputRef}
+        type={type}
         placeholder={placeholder}
         aria-label={label}
-        type="text"
         required={required}
         defaultValue={value}
         disabled={!editing}
@@ -86,7 +91,6 @@ export function Input({ label, placeholder, required, readonly=false, value, onS
     </div>
   )
 }
-
 export function TextArea({ label, placeholder, required, value, readonly, onSetValue }: InputProps) {
   const [ editing, inputRef, toggleEditing, handleConfirm, handleCancel ] = useSetupInput<HTMLTextAreaElement>(value, onSetValue);
 

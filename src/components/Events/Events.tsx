@@ -4,15 +4,17 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { fetchEventList, User } from '../../utils/service';
+import { timeToStr, timeToStrPretty } from "../../utils/utils";
 import Loader from "../Loader";
 type EventCardProps = {
   id: number,
   name: string,
+  time: number,
   description?: string,
   creator: User,
 };
 
-function EventCard({ id, name, description, creator }: EventCardProps) {
+function EventCard({ id, name, time, description, creator }: EventCardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -21,6 +23,7 @@ function EventCard({ id, name, description, creator }: EventCardProps) {
 
   return <div  className="container cursor-pointer w-full items-left p-4 justify-center bg-white dark:bg-gray-800 rounded-lg shadow my-2 border border-gray-700" onClick={handleClick}>
     <div>{name}</div>
+    <div>{timeToStrPretty(time)}</div>
     <div>
       {creator.username}
     </div>
@@ -45,10 +48,11 @@ function Events() {
         <Link to="/events/new">New Event</Link>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mx-8">
-        {events.map(({ id, name, description, creator }) =>
+        {events.map(({ id, name, description, time, creator }) =>
           <EventCard
             key={id}
             id={id}
+            time={time}
             name={name}
             description={description}
             creator={creator}

@@ -13,14 +13,15 @@ import {
   updateEvent,
   UpdateEvent
 } from '../../utils/service';
-import { useToggler } from "../../utils/utils";
+import { timeToStr, timeToStrPretty, useToggler } from "../../utils/utils";
 import { IconButton } from "../Button/IconButton";
 import { FadeDiv, FadeDivWithPresence } from "../FadeDiv";
-import { Input, TextArea } from "../Input/Input";
+import { Input, TextArea, TIME_FORMAT } from "../Input/Input";
 import HorizontalLine from "../HorizontalLine";
 import Loader from "../Loader";
 import NewRequirement from "../NewRequirement/NewRequirement";
 import Requirement from "../Requirement/Requirement";
+import moment from "moment";
 
 type EventDetailsMutator = (d: EventDetailData) => EventDetailData;
 
@@ -98,7 +99,7 @@ function EventDetail() {
 
   const { isLoggedIn, authData } = getAuthData();
   const userId = authData?.id;
-  const { name, description, participants, creator, requirements, fullfillments } = data;
+  const { name, description, time, participants, creator, requirements, fullfillments } = data;
   const isOwner = userId !== null && userId === creator.id;
   const isPariticipating = userId !== null && (participants.some(({ id }) => id === userId));
 
@@ -125,6 +126,14 @@ function EventDetail() {
         label="name"
         value={name}
         onSetValue={handleUpdateEvent((value: string) => ({ name: value }))}
+        readonly={!isOwner}
+      />
+      <Input
+        label="time"
+        type="datetime-local"
+        value={timeToStr(time)}
+        displayValue={timeToStrPretty(time)}
+        onSetValue={handleUpdateEvent((value: string) => ({ time: moment(value, TIME_FORMAT).unix() }))}
         readonly={!isOwner}
       />
       <HorizontalLine />

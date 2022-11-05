@@ -72,6 +72,7 @@ export type EventDetailData = {
   id: number,
   name: string,
   description?: string,
+  time: number,
   participants: User[],
   requirements: Requirement[],
   fullfillments: { requirement: number, user: User }[],
@@ -86,6 +87,7 @@ export type EventSummary = {
   id: number,
   name: string,
   description?: string,
+  time: number,
   creator: User,
 }
 
@@ -95,6 +97,7 @@ export const fetchEventList = async (): Promise<EventSummary[]> => {
 
 export type CreateEvent = {
   name: string,
+  time: number,
   description?: string
 }
 
@@ -104,7 +107,8 @@ export const createEvent = async (data: CreateEvent): Promise<EventSummary> => {
 
 export type UpdateEvent = Partial<{
   name: string,
-  description: string
+  description: string,
+  time: number,
 }>
 
 export const updateEvent = async (id: number, data: UpdateEvent): Promise<void> => {

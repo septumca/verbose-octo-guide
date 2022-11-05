@@ -1,4 +1,7 @@
 import { SyntheticEvent, useEffect, useState } from "react";
+import { TIME_FORMAT, TIME_FORMAT_PRETTY } from "../components/Input/Input";
+import moment from "moment";
+
 
 export type GetFormDataOptions = {
   removeEmptyString?: boolean,
@@ -71,3 +74,6 @@ export const useDebouncedChanges = <T>(
     update
   };
 }
+
+export const timeToStr = (time: number) => moment.unix(time).format(TIME_FORMAT);
+export const timeToStrPretty = (time: number) => moment.unix(time).format(TIME_FORMAT_PRETTY);
