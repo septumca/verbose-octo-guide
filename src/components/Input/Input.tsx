@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useToggler } from "../../utils/utils";
-import { IconButton } from "../Button/IconButton";
+import { Button } from "../Button/Button";
 
 type ValueSetter = (data: string) => void;
 export const TIME_FORMAT = 'YYYY-MM-DDTHH:mm';
@@ -51,7 +51,15 @@ function InputLabel({ children }: any) {
   return <div className="text-base leading-7 text-blueGray-500">{children}</div>
 }
 
-export function Input({ label, displayValue, placeholder, required, type="text", readonly=false, value, onSetValue }: InputProps) {
+export function Input({ className, forwardRef, ...props }: any) {
+  return <input
+    className={`p-2 mr-4 mt-2 text-base text-black transition duration-500 ease-in-out transform rounded-md border focus:border-blueGray-500 focus:bg-white focus:outline-none focus:shadow-outline focus:ring-2 ring-offset-current ring-offset-2 ${className ?? ''}`}
+    ref={forwardRef}
+    { ...props }
+  />
+}
+
+export function InputWithControls({ label, displayValue, placeholder, required, type="text", readonly=false, value, onSetValue }: InputProps) {
   const [ editing, inputRef, toggleEditing, handleConfirm, handleCancel ] = useSetupInput<HTMLInputElement>(value, onSetValue);
   const _displayValue = displayValue ?? value;
 
@@ -59,7 +67,7 @@ export function Input({ label, displayValue, placeholder, required, type="text",
     return (
       <div className="flex">
         <InputLabel>{_displayValue}</InputLabel>
-        {!readonly && <div className="ml-2"><IconButton onClick={toggleEditing}>⚙️</IconButton></div>}
+        {!readonly && <div className="ml-2"><Button onClick={toggleEditing}>⚙️</Button></div>}
       </div>
     );
   }
@@ -71,15 +79,15 @@ export function Input({ label, displayValue, placeholder, required, type="text",
           <InputLabel>{label}</InputLabel>
         </div>
         <div className="ml-2">
-          {editing && <IconButton title="confirm" onClick={handleConfirm}>✔️</IconButton>}
+          {editing && <Button title="confirm" onClick={handleConfirm}>✔️</Button>}
         </div>
         <div className="ml-2">
-          {editing && <IconButton title="close" onClick={handleCancel}>❌</IconButton>}
+          {editing && <Button title="close" onClick={handleCancel}>❌</Button>}
         </div>
       </div>
-      <input
-        className="w-full p-2 mr-4 mt-2 text-base text-black transition duration-500 ease-in-out transform rounded-md border focus:border-blueGray-500 focus:bg-white focus:outline-none focus:shadow-outline focus:ring-2 ring-offset-current ring-offset-2"
-        ref={inputRef}
+      <Input
+        className="w-full"
+        forwardRef={inputRef}
         type={type}
         placeholder={placeholder}
         aria-label={label}
@@ -91,20 +99,29 @@ export function Input({ label, displayValue, placeholder, required, type="text",
     </div>
   )
 }
-export function TextArea({ label, placeholder, required, value, readonly, onSetValue }: InputProps) {
+
+export function TextArea({ className, forwardRef, ...props }: any) {
+  return <textarea
+    className={`h-32 p-2 mt-2 text-base text-blueGray-500 transition duration-500 ease-in-out transform bg-white border rounded-lg focus:border-blue-500 focus:outline-none focus:shadow-outline focus:ring-2 ring-offset-current ring-offset-2 apearance-none autoexpand ${className ?? ''}`}
+    ref={forwardRef}
+    { ...props }
+  />
+}
+
+export function TextAreaWithControls({ label, placeholder, required, value, readonly, onSetValue }: InputProps) {
   const [ editing, inputRef, toggleEditing, handleConfirm, handleCancel ] = useSetupInput<HTMLTextAreaElement>(value, onSetValue);
 
   return (
     <div>
       <div className="flex mt-1">
         <InputLabel>{label}</InputLabel>
-        {editing && <div className="ml-2"><IconButton title="confirm" onClick={handleConfirm}>✔️</IconButton></div>}
-        {editing && <div className="ml-2"><IconButton title="close" onClick={handleCancel}>❌</IconButton></div>}
-        {!readonly && !editing && <div className="ml-2"><IconButton onClick={toggleEditing}>⚙️</IconButton></div>}
+        {editing && <div className="ml-2"><Button title="confirm" onClick={handleConfirm}>✔️</Button></div>}
+        {editing && <div className="ml-2"><Button title="close" onClick={handleCancel}>❌</Button></div>}
+        {!readonly && !editing && <div className="ml-2"><Button onClick={toggleEditing}>⚙️</Button></div>}
       </div>
-      <textarea
-        className="w-full h-32 p-2 mt-2 text-base text-blueGray-500 transition duration-500 ease-in-out transform bg-white border rounded-lg focus:border-blue-500 focus:outline-none focus:shadow-outline focus:ring-2 ring-offset-current ring-offset-2 apearance-none autoexpand"
-        ref={inputRef}
+      <TextArea
+        className="w-full"
+        forwardRef={inputRef}
         placeholder={placeholder}
         aria-label={label}
         rows={6}

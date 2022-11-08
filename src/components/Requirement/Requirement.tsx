@@ -3,14 +3,14 @@ import {
   Link,
 } from "react-router-dom";
 import { getAuthData } from "../../utils/auth";
-import { createFullfillment, deleteFullfillment, deleteRequirement, updateRequirement, UpdateRequirement, User } from "../../utils/service";
-import { useToggler } from "../../utils/utils";
-import { IconButton } from "../Button/IconButton";
-import { QUERY_TAG, useEventDetailsSuccess } from "../EventDetail/EventDetail";
-import { Input, TextArea } from "../Input/Input";
+import { createFullfillment, deleteFullfillment, deleteRequirement, EventDetailData, updateRequirement, UpdateRequirement, User } from "../../utils/service";
+import { useMutatorSuccess, useToggler } from "../../utils/utils";
+import { Button } from "../Button/Button";
+import { QUERY_TAG } from "../EventDetail/EventDetail";
+import { InputWithControls, TextAreaWithControls } from "../Input/Input";
 
 const useRequirementQueries = (requirement_id: number) => {
-  const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
+  const onSuccessHandler = useMutatorSuccess<EventDetailData>(QUERY_TAG);
 
   const addFullfillmentMut = useMutation(
     createFullfillment,
@@ -104,20 +104,20 @@ function Requirement({
 
   return (
     <div>
-      <Input
+      <InputWithControls
         label="name"
         value={name}
         onSetValue={handleUpdateRequirement((value: string) => ({ name: value }))}
         readonly={isOwner}
       />
       <div></div>
-      {isOwner && <div><IconButton onClick={handleDelete} title="delete requirement">🗑️</IconButton></div>}
+      {isOwner && <div><Button onClick={handleDelete} title="delete requirement">🗑️</Button></div>}
       <div>
-        {isLoggedIn && !hadFullfilled && size > fullfillments.length && <IconButton onClick={handleAddFullfillment} title="fullfill">✔️</IconButton>}
-        <IconButton title="see details" onClick={toggleDetailsVisible}>👁️‍🗨️</IconButton>
+        {isLoggedIn && !hadFullfilled && size > fullfillments.length && <Button onClick={handleAddFullfillment} title="fullfill">👍</Button>}
+        <Button title="see details" onClick={toggleDetailsVisible}>👁️‍🗨️</Button>
         <span>{fullfillments.length}/{size}</span>
       </div>
-      {detailsVisible && <TextArea
+      {detailsVisible && <TextAreaWithControls
         label="description"
         value={description ?? ''}
         onSetValue={handleUpdateRequirement((value: string) => ({ description: value }))}
@@ -127,7 +127,7 @@ function Requirement({
         {fullfillments.map(({ user: { id, username } }) =>
           <div key={id}>
             <Link to={`/users/${id}`}>{username}</Link>
-            {id === userId && <IconButton onClick={handleRemoveFullfillment} title="leave">🏃💨</IconButton>}
+            {id === userId && <Button onClick={handleRemoveFullfillment} title="leave">🏃💨</Button>}
           </div>
         )}
       </div>}

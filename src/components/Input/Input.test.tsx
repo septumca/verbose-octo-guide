@@ -1,13 +1,13 @@
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {fireEvent, render, screen} from '@testing-library/react';
-import { Input, InputProps, TextArea } from './Input';
+import { InputWithControls, InputProps, TextAreaWithControls } from './Input';
 
 describe("Inputs", () => {
   describe('Input', () => {
     const label = 'test-name';
     let testValue = 'dummy-value';
     const onSetValue = vi.fn();
-    const createInput = (props: Partial<InputProps>) => <Input label={label} value={testValue} onSetValue={onSetValue} {...props} />;
+    const createInput = (props: Partial<InputProps>) => <InputWithControls label={label} value={testValue} onSetValue={onSetValue} {...props} />;
 
     const setup = (props: Partial<InputProps>) => {
       return render(createInput(props));
@@ -129,7 +129,7 @@ describe("Inputs", () => {
     const label = 'test-name';
     let testValue = 'dummy-value';
     const onSetValue = vi.fn();
-    const createInput = (props: Partial<InputProps>) => <TextArea label={label} value={testValue} onSetValue={onSetValue} {...props} />;
+    const createInput = (props: Partial<InputProps>) => <TextAreaWithControls label={label} value={testValue} onSetValue={onSetValue} {...props} />;
 
     const setup = (props: Partial<InputProps>) => {
       return render(createInput(props));

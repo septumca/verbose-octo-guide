@@ -4,7 +4,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { fetchEventList, User } from '../../utils/service';
-import { timeToStr, timeToStrPretty } from "../../utils/utils";
+import { timeToStrPretty } from "../../utils/utils";
 import Loader from "../Loader";
 type EventCardProps = {
   id: number,

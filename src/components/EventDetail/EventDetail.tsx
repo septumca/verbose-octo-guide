@@ -13,34 +13,20 @@ import {
   updateEvent,
   UpdateEvent
 } from '../../utils/service';
-import { timeToStr, timeToStrPretty, useToggler } from "../../utils/utils";
-import { IconButton } from "../Button/IconButton";
+import { timeToStr, timeToStrPretty, useMutatorSuccess, useToggler } from "../../utils/utils";
+import { Button } from "../Button/Button";
 import { FadeDiv, FadeDivWithPresence } from "../FadeDiv";
-import { Input, TextArea, TIME_FORMAT } from "../Input/Input";
+import { InputWithControls, TextAreaWithControls, TIME_FORMAT } from "../Input/Input";
 import HorizontalLine from "../HorizontalLine";
 import Loader from "../Loader";
 import NewRequirement from "../NewRequirement/NewRequirement";
 import Requirement from "../Requirement/Requirement";
 import moment from "moment";
 
-type EventDetailsMutator = (d: EventDetailData) => EventDetailData;
-
 export const QUERY_TAG = ['event', 'single'];
-export const useEventDetailsSuccess = (QUERY_TAG: string[]) => {
-  const qc = useQueryClient();
-
-  return (mutator: EventDetailsMutator) => {
-    qc.setQueryData<EventDetailData>(QUERY_TAG, d => {
-      if (d !== undefined) {
-        return mutator(d)
-      }
-      return d;
-    })
-  };
-}
 
 const useEventDetailQueries = (event_id: number) => {
-  const onSuccessHandler = useEventDetailsSuccess(QUERY_TAG);
+  const onSuccessHandler = useMutatorSuccess<EventDetailData>(QUERY_TAG);
   const { data, isLoading } = useQuery(QUERY_TAG, () => fetchEvent(event_id), { refetchOnWindowFocus: false });
 
   const addParticipantMut = useMutation(
@@ -122,13 +108,13 @@ function EventDetail() {
 
   return (
     <div className="mx-2 my-4">
-      <Input
+      <InputWithControls
         label="name"
         value={name}
         onSetValue={handleUpdateEvent((value: string) => ({ name: value }))}
         readonly={!isOwner}
       />
-      <Input
+      <InputWithControls
         label="time"
         type="datetime-local"
         value={timeToStr(time)}
@@ -144,7 +130,7 @@ function EventDetail() {
         </div>
       </Link>
       <HorizontalLine />
-      <TextArea
+      <TextAreaWithControls
         label="description"
         value={description ?? ''}
         onSetValue={handleUpdateEvent((value: string) => ({ description: value }))}
@@ -183,7 +169,7 @@ function EventDetail() {
             )}
           </AnimatePresence>
         </div>
-        {isOwner && !newRequirement && <IconButton onClick={handleToggleNewRequirement}>➕ requirement</IconButton>}
+        {isOwner && !newRequirement && <Button onClick={handleToggleNewRequirement}>➕ requirement</Button>}
       </div>
     </div>
   )

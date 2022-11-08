@@ -1,6 +1,7 @@
-import { SyntheticEvent, useEffect, useState } from "react";
+import { RefObject, SyntheticEvent, useEffect, useState } from "react";
 import { TIME_FORMAT, TIME_FORMAT_PRETTY } from "../components/Input/Input";
 import moment from "moment";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 export type GetFormDataOptions = {
@@ -41,7 +42,8 @@ export const useInputData = (initData: {[x: string]: any }) => {
 
   return {
     data,
-    handleInputChange
+    handleInputChange,
+    setData
   };
 }
 
@@ -77,3 +79,38 @@ export const useDebouncedChanges = <T>(
 
 export const timeToStr = (time: number) => moment.unix(time).format(TIME_FORMAT);
 export const timeToStrPretty = (time: number) => moment.unix(time).format(TIME_FORMAT_PRETTY);
+
+export const useMutatorSuccess = <T>(QUERY_TAG: string[]) => {
+  const qc = useQueryClient();
+
+  return (mutator: (d: T) => T) => {
+    qc.setQueryData<T>(QUERY_TAG, d => {
+      if (d !== undefined) {
+        return mutator(d)
+      }
+      return d;
+    })
+  };
+}
+
+//based on https://usehooks.com/useOnClickOutside/
+export const useOnClickOutside = (ref: RefObject<HTMLElement>, handler: (event?: MouseEvent) => void) => {
+  useEffect(
+    () => {
+      const listener = (event: any) => {
+        // Do nothing if clicking ref's element or descendent elements
+        if (!ref.current || ref.current.contains(event.target)) {
+          return;
+        }
+        handler(event);
+      };
+      document.addEventListener("mousedown", listener);
+      document.addEventListener("touchstart", listener);
+      return () => {
+        document.removeEventListener("mousedown", listener);
+        document.removeEventListener("touchstart", listener);
+      };
+    },
+    [ref, handler]
+  );
+}

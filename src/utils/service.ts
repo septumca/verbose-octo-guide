@@ -142,6 +142,15 @@ export const deleteRequirement = async (id: number): Promise<void> => {
   await makeFetch('DELETE', `requirement/${id}`);
 }
 
+export type RequirementSuggestion = {
+  name: string,
+  score: number
+}
+
+export const fetchRequirementSuggestionsForUser =async (userId: number): Promise<RequirementSuggestion[]> => {
+  return (await makeFetch('GET', `user/${userId}/requirements`)).json() ?? [];
+}
+
 export type CreateParticipant = {
   user: number,
   event: number,

@@ -6,8 +6,9 @@ import {
 import { getAuthData } from "../../utils/auth";
 import { CreateEvent, createEvent } from '../../utils/service';
 import { removeEmptyStrings, useInputData } from "../../utils/utils";
-import { TIME_FORMAT } from "../Input/Input";
+import { Input, TextArea, TIME_FORMAT } from "../Input/Input";
 import moment from 'moment';
+import { Button } from "../Button/Button";
 
 
 function EventNew() {
@@ -36,7 +37,7 @@ function EventNew() {
     <div>
       <div>
         <span>Name</span>
-        <input
+        <Input
           placeholder="Event Name"
           aria-label="Event name"
           type="text"
@@ -47,7 +48,7 @@ function EventNew() {
       </div>
       <div>
         <span>Time</span>
-        <input
+        <Input
           placeholder="Event Time"
           aria-label="Event time"
           type="datetime-local"
@@ -58,15 +59,15 @@ function EventNew() {
       </div>
       <div>
         <div>Description</div>
-        <textarea
+        <TextArea
           name="description"
           rows={6}
           onChange={handleInputChange}
         />
       </div>
       <div>
-        <button onClick={handleCreate}>Save</button>
-        <button onClick={handleCancel}>Cancel</button>
+        <Button className="mr-1" onClick={handleCreate}>💾 Save</Button>
+        <Button onClick={handleCancel}>❌ Cancel</Button>
       </div>
     </div>
   )
